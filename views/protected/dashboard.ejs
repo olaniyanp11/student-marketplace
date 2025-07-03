@@ -1,0 +1,135 @@
+<%- include('../partials/header') %>
+
+<main class="flex min-h-screen">
+  <!-- Sidebar (unchanged) -->
+  <aside class="hidden lg:flex flex-col w-64 bg-[#0d0d0d] border-r border-[#1e1e1e]">
+    <div class="px-6 py-4 text-2xl font-bold tracking-wide">
+      <i class="fas fa-tachometer-alt mr-2 text-[#9ee261]"></i> Dashboard
+    </div>
+    <nav class="flex-1 px-4 space-y-2 text-sm">
+      <a href="/user/dashboard" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-home mr-3 text-[#9ee261]"></i> Overview
+      </a>
+      <a href="/products/all" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-store mr-3 text-[#9ee261]"></i> Browse Products
+      </a>
+      <a href="/products/my" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-shopping-basket mr-3 text-[#9ee261]"></i> My Products
+      </a>
+      <a href="/products/create" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-add mr-3 text-[#9ee261]"></i> Add Products
+      </a>
+      <a href="/orders/my" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-shopping-basket mr-3 text-[#9ee261]"></i> My Orders
+      </a>
+      <a href="/orders/transactions/" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-money mr-3 text-[#9ee261]"></i> My Transactions
+      </a>
+      <a href="/user/profile/edit" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-user-edit mr-3 text-[#9ee261]"></i> Edit Profile
+      </a>
+    </nav>
+    <div class="px-6 py-4">
+      <a href="/logout" class="flex items-center text-red-500 hover:text-red-600">
+        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <section class="flex-1 p-6">
+    <!-- Greeting -->
+    <h1 class="text-3xl font-semibold mb-6">
+      Welcome back, <%= user.name %>!
+    </h1>
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div class="bg-[#141414] border border-[#1e1e1e] rounded-xl p-6 shadow-lg" data-aos="fade-up">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase text-gray-400">Products</p>
+            <h2 class="text-3xl font-bold"><%= stats.products %></h2>
+          </div>
+          <i class="fas fa-box-open text-3xl text-[#9ee261]"></i>
+        </div>
+      </div>
+      <div class="bg-[#141414] border border-[#1e1e1e] rounded-xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="100">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase text-gray-400">Orders</p>
+            <h2 class="text-3xl font-bold"><%= stats.orders %></h2>
+          </div>
+          <i class="fas fa-shopping-cart text-3xl text-[#9ee261]"></i>
+        </div>
+      </div>
+      <div class="bg-[#141414] border border-[#1e1e1e] rounded-xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="200">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase text-gray-400">Revenue</p>
+            <h2 class="text-3xl font-bold">₦<%= stats.revenue.toLocaleString() %></h2>
+          </div>
+          <i class="fas fa-coins text-3xl text-[#9ee261]"></i>
+        </div>
+      </div>
+      <div class="bg-[#141414] border border-[#1e1e1e] rounded-xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="300">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase text-gray-400">Users</p>
+            <h2 class="text-3xl font-bold"><%= stats.users %></h2>
+          </div>
+          <i class="fas fa-users text-3xl text-[#9ee261]"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="mt-10 bg-[#141414] border border-[#1e1e1e] rounded-xl overflow-hidden" data-aos="fade-up">
+      <div class="p-6 border-b border-[#1e1e1e]">
+        <h2 class="text-xl font-semibold">Recent Orders</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-[#1f1f1f] text-left">
+            <tr>
+              <th class="px-6 py-3 font-medium">Order ID</th>
+              <th class="px-6 py-3 font-medium">Customer</th>
+              <th class="px-6 py-3 font-medium">Amount</th>
+              <th class="px-6 py-3 font-medium">Status</th>
+              <th class="px-6 py-3 font-medium">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(order => { %>
+              <tr class="border-b border-[#1e1e1e] hover:bg-[#1a1a1a]">
+                <td class="px-6 py-3"><%= order._id %></td>
+<td class="px-6 py-3"><%= order.buyerName %></td>
+
+                <td class="px-6 py-3">₦<%= order.total %></td>
+                <td class="px-6 py-3">
+                  <span
+                    class="px-2 py-1 rounded-full text-xs
+                      <% if (order.status === 'delivered') { %>
+                        bg-[#9ee261]/20 text-[#9ee261]
+                      <% } else if (order.status === 'pending') { %>
+                        bg-yellow-500/20 text-yellow-400
+                      <% } else if (order.status === 'shipped') { %>
+                        bg-blue-500/20 text-blue-400
+                      <% } else { %>
+                        bg-red-500/20 text-red-400
+                      <% } %>"
+                  >
+                    <%= order.status %>
+                  </span>
+                </td>
+                <td class="px-6 py-3"><%= order.createdAt.toLocaleDateString() %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

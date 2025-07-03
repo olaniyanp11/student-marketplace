@@ -1,0 +1,81 @@
+<%- include('partials/header') %>
+
+<div class="flex items-center justify-center min-h-screen bg-white px-4">
+  <div class="w-full max-w-sm p-8 bg-black  shadow-xl rounded-2xl border border-gray-800">
+    <h2 class="text-2xl font-bold text-center mb-6 text-white">Create an Account</h2>
+
+    <form action="/register" method="POST" class="space-y-5" id="signupForm">
+
+     <!-- Full Name -->
+<div>
+  <label for="name" class="block mb-1 text-sm font-medium text-white">Full Name</label>
+  <input 
+    type="text" 
+    name="name" 
+    id="name"
+    required 
+    placeholder="Jane Doe"
+    class="w-full px-4 py-2 rounded-lg bg-white text-black border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#9ee261]" />
+</div>
+
+<!-- Email -->
+<div>
+  <label for="email" class="block mb-1 text-sm font-medium text-white">Email</label>
+  <input 
+    type="email" 
+    name="email" 
+    id="email"
+    required 
+    placeholder="you@example.com"
+    class="w-full px-4 py-2 rounded-lg bg-white text-black border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#9ee261]" />
+</div>
+
+<!-- Password -->
+<div>
+  <label for="password" class="block mb-1 text-sm font-medium text-white">Password</label>
+  <input 
+    type="password" 
+    name="password" 
+    id="password"
+    required 
+    placeholder="Enter a strong password"
+    class="w-full px-4 py-2 rounded-lg bg-white text-black border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#9ee261]" />
+</div>
+
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        id="submitBtn"
+        class="w-full bg-[#9ee261] text-black font-semibold py-2 rounded-lg hover:opacity-90 transition">
+        Register
+      </button>
+
+      <!-- Loader -->
+      <div id="loader" class="hidden flex justify-center mt-4">
+        <div class="w-6 h-6 border-4 border-[#9ee261] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </form>
+
+    <!-- Link to login -->
+    <p class="text-sm text-center text-gray-400 mt-6">
+      Already have an account? 
+      <a href="/login" class="text-[#9ee261] hover:underline">Login</a>
+    </p>
+  </div>
+</div>
+
+<!-- loading script -->
+<script>
+  const form = document.getElementById('signupForm');
+  const loader = document.getElementById('loader');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', () => {
+    loader.classList.remove('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing Up...';
+  });
+</script>
+
+<%- include('partials/footer') %>

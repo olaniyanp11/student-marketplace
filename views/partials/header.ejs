@@ -1,0 +1,113 @@
+<!-- partials/header.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || "CampusMart" %></title>
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+
+  <!-- Font Awesome SVG Icons -->
+  <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/css/output.css">
+</head>
+<body class="min-h-screen bg-black text-white font-sans">
+  <div class="w-full h-full">
+
+    <div class="bg-white pt-3">
+      <nav class="text-white w-[80%] mx-auto z-50 bg-black rounded-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <a href="/" class="text-xl font-semibold">CampusMart</a>
+
+            <!-- Hamburger for mobile -->
+            <div class="md:hidden">
+              <button id="menuToggle" class="text-white focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+              </button>
+            </div>
+
+            <!-- Desktop menu -->
+<!-- Desktop Links -->
+<div class="hidden md:flex space-x-4 text-sm items-center" id="desktopMenu">
+  <a href="/" class="hover:text-[#9ee261]">Home</a>
+  <a href="/products/all" class="hover:text-[#9ee261]">Browse Products</a>
+
+  <% if (user) { %>
+    <% if (user.role === 'user') { %>
+      <a href="/user/dashboard" class="hover:text-[#9ee261]">Dashboard</a>
+      <a href="/orders" class="hover:text-[#9ee261]">My Orders</a>
+      <a href="/user/profile/edit" class="hover:text-[#9ee261]">Profile</a>
+    <% } else if (user.role === 'admin') { %>
+      <a href="/admin/dashboard" class="hover:text-[#9ee261]">Admin Panel</a>
+      <a href="/admin/products" class="hover:text-[#9ee261]">Manage Products</a>
+      <a href="/admin/users" class="hover:text-[#9ee261]">Users</a>
+    <% } %>
+    <a href="/logout" class="text-red-500 hover:text-red-600">Logout</a>
+  <% } else { %>
+    <a href="/login" class="hover:text-[#9ee261]">Login</a>
+  <% } %>
+</div>
+
+
+        <!-- Mobile menu -->
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="md:hidden px-4 pb-4 hidden fixed top-16 z-50 w-full bg-black flex-col space-y-6 text-md transition-all duration-200 ease-in-out">
+  <a href="/" class="hover:text-[#9ee261]">Home</a>
+  <a href="/products/all" class="hover:text-[#9ee261]">Browse Products</a>
+
+  <% if (user) { %>
+    <% if (user.role === 'user') { %>
+      <a href="/user/dashboard" class="hover:text-[#9ee261]">Dashboard</a>
+      <a href="/user/orders" class="hover:text-[#9ee261]">My Orders</a>
+      <a href="/user/profile/edit" class="hover:text-[#9ee261]">Profile</a>
+    <% } else if (user.role === 'admin') { %>
+      <a href="/admin/dashboard" class="hover:text-[#9ee261]">Admin Panel</a>
+      <a href="/admin/products" class="hover:text-[#9ee261]">Manage Products</a>
+      <a href="/admin/users" class="hover:text-[#9ee261]">Users</a>
+    <% } %>
+    <a href="/logout" class="text-red-500 hover:text-red-600">Logout</a>
+  <% } else { %>
+    <a href="/login" class="hover:text-[#9ee261]">Login</a>
+  <% } %>
+</div>
+
+      </nav>
+    </div>
+
+    <!-- Flash Messages -->
+    <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+      <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md bg-green-500 text-white px-4 py-3 rounded shadow flex justify-between items-center mb-4">
+        <span><%= success_msg %></span>
+        <button onclick="this.parentElement.remove()" class="text-white font-bold">&times;</button>
+      </div>
+    <% } %>
+
+    <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+      <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md bg-red-500 text-white px-4 py-3 rounded shadow flex justify-between items-center mb-4">
+        <span><%= error_msg %></span>
+        <button onclick="this.parentElement.remove()" class="text-white font-bold">&times;</button>
+      </div>
+    <% } %>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md bg-red-600 text-white px-4 py-3 rounded shadow mb-4">
+        <ul class="list-disc pl-5">
+          <% errors.forEach(function(error) { %>
+            <li><%= error %></li>
+          <% }); %>
+        </ul>
+        <button onclick="this.parentElement.remove()" class="text-white font-bold float-right mt-2">&times;</button>
+      </div>
+    <% } %>
+
+    <!-- Menu Toggle Script -->
+    <script>
+      const menuToggle = document.getElementById('menuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+      menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    </script>

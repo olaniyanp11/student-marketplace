@@ -1,0 +1,29 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto mt-12 p-6 bg-[#141414] text-white rounded-xl shadow-lg">
+  <div class="flex items-center gap-6">
+    <img src="<%= user.profilePic %>" alt="Profile Picture"
+         class="w-24 h-24 object-cover rounded-full border-2 border-[#9ee261]">
+
+    <div>
+      <h1 class="text-2xl font-bold"><%= user.name %></h1>
+      <p class="text-gray-400 text-sm"><%= user.email %></p>
+      <p class="text-xs text-gray-500 mt-1">Role: <span class="text-[#9ee261] font-medium uppercase"><%= user.role %></span></p>
+    </div>
+  </div>
+
+  <% if (user.bio) { %>
+  <div class="mt-6">
+    <h2 class="font-semibold text-lg mb-2">About Me</h2>
+    <p class="text-gray-300 text-sm leading-relaxed"><%= user.bio %></p>
+  </div>
+  <% } %>
+
+  <div class="mt-6 text-right">
+    <a href="/user/profile/edit" class="bg-[#9ee261] text-black px-4 py-2 rounded font-medium hover:opacity-90 transition">
+      Edit Profile
+    </a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,46 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-4xl mx-auto px-4 py-10 text-white">
+  <h1 class="text-2xl font-bold mb-6">My Transactions</h1>
+
+
+  <% if (transactions.length > 0) { %>
+    <div class="grid md:grid-cols-2 gap-6">
+      <% transactions.forEach(order => { %>
+        <div class="bg-[#1a1a1a] rounded-lg p-4 shadow">
+          <img src="<%= order.product.image %>" class="w-full h-40 object-cover rounded mb-2" />
+          <h2 class="text-xl font-semibold"><%= order.product.title %></h2>
+          <p class="text-gray-400 text-sm mb-1"><%= order.product.description %></p>
+          <p><strong>Amount:</strong> ₦<%= order.amount %></p>
+          <p><strong>Seller:</strong> <%= order.seller.name %></p>
+          <p><strong>Reference:</strong> <%= order.reference %></p>
+
+          <p class="mt-2">
+            Payment: <span class="text-sm px-2 py-1 rounded bg-green-500">completed</span>
+          </p>
+
+          <p class="mt-2">
+            Delivery: 
+            <span class="text-sm px-2 py-1 rounded <%= order.buyerConfirmed ? 'bg-green-500' : 'bg-yellow-500' %>">
+              <%= order.buyerConfirmed ? "delivered" : "pending" %>
+            </span>
+          </p>
+
+          <% if (!order.buyerConfirmed) { %>
+            <form action="/orders/confirm-delivery/<%= order._id %>" method="POST">
+              <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded">
+                ✅ Confirm Delivery
+              </button>
+            </form>
+          <% } else { %>
+            <p class="text-green-400 mt-2">✅ Delivery confirmed</p>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p>No completed transactions found.</p>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>
