@@ -26,10 +26,15 @@ router.post('/init', authenticateToken, getUser, async (req, res) => {
       req.flash('error', 'Insufficient stock or item is sold out.');
       return res.redirect('/user');
     }
-    console.log(product.owner._id +"     " + user._id)
     if(product.owner._id.equals(user._id)){
       req.flash('error', 'You cant Buy Your Own Products');
       return res.redirect('/user');
+    }
+    console.log("owner    " +product.owner)
+
+    if (user.role === 'admin'){
+       req.flash('error', 'You cant Buy Products With This Account');
+      return res.redirect('/admin/dashboard');
     }
     const existingPendingOrder = await Order.findOne({
       buyer: user._id,
@@ -75,7 +80,7 @@ amount = amount * quantity
     return res.redirect(authUrl);
   } catch (err) {
     console.error(err);
-    req.flash('error', 'Payment initialization failed.');
+    req.flash('error', 'Network Error : Payment initialization failed.');
     return res.redirect('/user');
   }
 });

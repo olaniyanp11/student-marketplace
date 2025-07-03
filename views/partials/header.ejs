@@ -38,11 +38,10 @@
   <% if (user) { %>
     <% if (user.role === 'user') { %>
       <a href="/user/dashboard" class="hover:text-[#9ee261]">Dashboard</a>
-      <a href="/orders" class="hover:text-[#9ee261]">My Orders</a>
+      <a href="/orders" class="hover:text-[#9ee261]">Transactions</a>
       <a href="/user/profile/edit" class="hover:text-[#9ee261]">Profile</a>
     <% } else if (user.role === 'admin') { %>
       <a href="/admin/dashboard" class="hover:text-[#9ee261]">Admin Panel</a>
-      <a href="/admin/products" class="hover:text-[#9ee261]">Manage Products</a>
       <a href="/admin/users" class="hover:text-[#9ee261]">Users</a>
     <% } %>
     <a href="/logout" class="text-red-500 hover:text-red-600">Logout</a>

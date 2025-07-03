@@ -113,40 +113,38 @@ router.get(['/dashboard', '/user'], authenticateToken, async (req, res) => {
     }
 
     // Fetch dynamic stats
-    const [productCount, orderCount, revenue, userCount] = await Promise.all([
+    const [productCount, orderCount, revenueAgg, userCount] = await Promise.all([
       Product.countDocuments({ owner: userId }),
       Order.countDocuments({ seller: userId }),
-      Order.aggregate([
-        { $match: { seller: user._id, status: 'completed' } },
-        { $group: { _id: null, total: { $sum: '$amount' } } }
-      ]),
+Order.aggregate([
+  { $match: { seller: user._id, status: { $in: ['completed', 'delivered', 'shipped'] } } },
+  { $group: { _id: null, total: { $sum: '$amount' } } }
+]),
       User.countDocuments()
     ]);
 
+    // revenueAgg is an array, if not empty, revenueAgg[0].total is the sum of ALL completed orders
     const stats = {
       products: productCount,
       orders: orderCount,
-      revenue: revenue[0]?.total || 0,
+      revenue: revenueAgg.length > 0 ? revenueAgg[0].total : 0,
       users: userCount
     };
 
     // Fetch recent orders made to this seller
-const orders = await Order.find({ seller: userId })
+    const orders = await Order.find({ seller: userId })
       .sort({ createdAt: -1 })
       .limit(5)
-      .populate('buyer').populate('seller'); // This population is still necessary to get the buyer object
-
-    console.log(orders[0]); // Safely log to check if buyer exists for the first order
+      .populate('buyer').populate('seller');
 
     const formattedOrders = orders.map(order => ({
       _id: order._id,
-      // Use optional chaining (?.) and nullish coalescing (||) for safety
       buyerName: order.buyer?.name || 'Unknown',
       total: order.amount || 0,
       status: order.status.toUpperCase(),
       createdAt: order.createdAt
     }));
-console.log(formattedOrders[0])
+
     res.render('protected/dashboard', {
       title: 'Dashboard',
       user,

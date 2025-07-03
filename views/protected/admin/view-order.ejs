@@ -1,0 +1,60 @@
+<%- include('../../partials/header') %>
+
+<div class="max-w-4xl mx-auto px-4 py-10 text-white">
+  <h1 class="text-2xl font-bold mb-6">Order Details</h1>
+
+  <div class="bg-[#1a1a1a] rounded-lg p-6 shadow space-y-4">
+
+    <div>
+      <p><strong>Order ID:</strong> <%= order._id %></p>
+      <p><strong>Amount:</strong> ₦<%= order.amount.toLocaleString() %></p>
+      <p><strong>Quantity:</strong> <%= order.quantity %></p>
+      <p><strong>Reference:</strong> <%= order.reference %></p>
+      <p><strong>Ordered On:</strong> <%= new Date(order.createdAt).toLocaleString() %></p>
+    </div>
+
+    <% if (order.product) { %>
+      <div class="border-t pt-4">
+        <h2 class="text-xl font-semibold mb-2">Product Info</h2>
+        <img src="<%= order.product.image %>" class="w-full h-48 object-cover rounded mb-2" />
+        <p><strong>Title:</strong> <%= order.product.title %></p>
+        <p><strong>Description:</strong> <%= order.product.description %></p>
+      </div>
+    <% } %>
+
+    <div class="border-t pt-4">
+      <h2 class="text-xl font-semibold mb-2">Buyer Info</h2>
+      <p><strong>Name:</strong> <%= order.buyer?.name || 'Unknown' %></p>
+      <p><strong>Email:</strong> <%= order.buyer?.email || 'N/A' %></p>
+    </div>
+
+    <div class="border-t pt-4">
+      <h2 class="text-xl font-semibold mb-2">Seller Info</h2>
+      <p><strong>Name:</strong> <%= order.seller?.name || 'Unknown' %></p>
+      <p><strong>Email:</strong> <%= order.seller?.email || 'N/A' %></p>
+    </div>
+
+    <div class="border-t pt-4">
+      <h2 class="text-xl font-semibold mb-2">Status</h2>
+      <p>
+        <strong>Payment:</strong>
+        <span class="px-2 py-1 rounded bg-green-500 text-sm">Completed</span>
+      </p>
+      <p>
+        <strong>Delivery:</strong>
+        <span class="px-2 py-1 rounded text-sm 
+          <%= order.status === 'shipped' ? 'bg-blue-500' 
+            : order.buyerConfirmed ? 'bg-green-500' 
+            : 'bg-yellow-500' %>">
+          <%= order.status === 'shipped' ? 'Shipped' 
+                : order.buyerConfirmed ? 'Delivered' 
+                : 'Pending' %>
+        </span>
+      </p>
+    </div>
+  </div>
+
+  <a href="/admin/orders" class="mt-6 inline-block text-blue-400 hover:underline">← Back to Orders</a>
+</div>
+
+<%- include('../../partials/footer') %>

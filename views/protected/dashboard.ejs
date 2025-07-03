@@ -3,6 +3,10 @@
 <main class="flex min-h-screen">
   <!-- Sidebar (unchanged) -->
   <aside class="hidden lg:flex flex-col w-64 bg-[#0d0d0d] border-r border-[#1e1e1e]">
+    <div class="px-6 py-4 text-2xl font-bold tracking-wide object-center flex justify-center">
+    <img src="<%= user.profilePic %>" alt="Profile Picture"
+         class="w-20 h-20 object-cover rounded-full border-2 border-[#9ee261]">
+    </div>
     <div class="px-6 py-4 text-2xl font-bold tracking-wide">
       <i class="fas fa-tachometer-alt mr-2 text-[#9ee261]"></i> Dashboard
     </div>
@@ -19,11 +23,11 @@
       <a href="/products/create" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
         <i class="fas fa-add mr-3 text-[#9ee261]"></i> Add Products
       </a>
-      <a href="/orders/my" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
-        <i class="fas fa-shopping-basket mr-3 text-[#9ee261]"></i> My Orders
+      <a href="/orders" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
+        <i class="fas fa-shopping-basket mr-3 text-[#9ee261]"></i> Transactions
       </a>
       <a href="/orders/transactions/" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
-        <i class="fas fa-money mr-3 text-[#9ee261]"></i> My Transactions
+        <i class="fas fa-money mr-3 text-[#9ee261]"></i> Sold Products
       </a>
       <a href="/user/profile/edit" class="flex items-center px-4 py-2 rounded hover:bg-[#1a1a1a]">
         <i class="fas fa-user-edit mr-3 text-[#9ee261]"></i> Edit Profile

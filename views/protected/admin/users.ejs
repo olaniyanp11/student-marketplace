@@ -7,7 +7,7 @@
     <% if (users.length > 0) { %>
       <div class="overflow-x-auto">
         <table class="w-full text-md text-left text-gray-200 bg-[#242424] border border-[#1e1e1e] rounded-xl p-6 shadow-lg">
-          <thead class="text-xs uppercase bg-[#0f0f0f] text-gray-200">
+          <thead class="text-xs uppercase bg-[#0f0f0f] text-gray-200 rounded-xl">
             <tr class="py-10">
               <th scope="col" class="px-6 py-7">Email</th>
               <th scope="col" class="px-6 py-7">Role</th>
@@ -16,13 +16,19 @@
           </thead>
           <tbody class="bg-[#141414] border border-[#1e1e1e] rounded-xl p-6 shadow-lg">
             <% users.forEach(u => { %>
-              <tr class="border-b border-black hover:bg-[#292929] transition ">
+              <tr class="border-b border-black hover:bg-[#292929] transition rounded-t-xl">
+                <td class="px-6 py-4">
+                                <div class="px-6 py-4 text-2xl font-bold tracking-wide object-center flex justify-center">
+              <img src="<%= u.profilePic %>" alt="Profile Picture"
+                  class="w-20 h-20 object-cover rounded-full border-2 border-[#9ee261]">
+              </div>
+                </td>
                 <td class="px-6 py-4"><%= u.email %></td>
                 <td class="px-6 py-4"><%= u.role %></td>
                 <td class="px-6 py-4">
                   <% if (u.role !== 'admin') { %>
-                    <form method="POST" action="/admin/delete-user/<%= u._id %>" class="inline">
-                      <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Make Admin</button>
+                    <form method="POST" action="/admin/users/<%= u._id %>/delete" class="inline">
+                      <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete User</button>
                     </form>
                   <% } else { %>
                     <span class="text-green-400">Already Admin</span>

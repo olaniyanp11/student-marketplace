@@ -1,0 +1,46 @@
+<%- include('../../partials/header') %>
+
+<div class="max-w-6xl mx-auto px-4 py-10 text-white">
+  <h1 class="text-3xl font-bold mb-6">All Orders</h1>
+
+  <% if (orders.length > 0) { %>
+    <div class="grid md:grid-cols-2 gap-6">
+      <% orders.forEach(order => { %>
+        <div class="bg-[#1a1a1a] rounded-lg p-4 shadow">
+          <% if (order.product) { %>
+            <img src="<%= order.product.image %>" class="w-full h-40 object-cover rounded mb-2" />
+            <h2 class="text-xl font-semibold"><%= order.product.title %></h2>
+            <p class="text-gray-400 text-sm mb-1"><%= order.product.description %></p>
+          <% } %>
+
+          <p><strong>Amount:</strong> ₦<%= order.amount %></p>
+          <p><strong>Quantity:</strong> <%= order.quantity %></p>
+          <p><strong>Buyer:</strong> <%= order.buyer?.name || 'N/A' %></p>
+          <p><strong>Seller:</strong> <%= order.seller?.name || 'N/A' %></p>
+          <p><strong>Reference:</strong> <%= order.reference %></p>
+
+          <p class="mt-2">
+            Payment:
+            <span class="text-sm px-2 py-1 rounded bg-green-500">completed</span>
+          </p>
+
+          <p class="mt-2">
+            Delivery:
+            <span class="text-sm px-2 py-1 rounded 
+              <%= order.status === 'shipped' ? 'bg-blue-500' 
+                : order.buyerConfirmed ? 'bg-green-500' 
+                : 'bg-yellow-500' %>">
+              <%= order.status === 'shipped' 
+                    ? 'shipped' 
+                    : (order.buyerConfirmed ? 'delivered' : 'pending') %>
+            </span>
+          </p>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p>No orders yet.</p>
+  <% } %>
+</div>
+
+<%- include('../../partials/footer') %>

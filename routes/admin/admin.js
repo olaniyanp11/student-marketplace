@@ -3,74 +3,71 @@ const requireRole = require("../../middlewares/checkrole");
 const Order = require("../../models/Order");
 const User = require("../../models/User");
 const Product = require('../../models/Product');
+const Review = require('../../models/Review');
 const express = require('express')
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
 
 
 
 
-router.get(['/dashboard', '/admin/dashboard'], authenticateToken,  async (req, res) => {
+
+router.get('/dashboard', authenticateToken,  async (req, res) => {
   try {
-
     const userId = req.user.userId;
     const user = await User.findById(userId);
-    if (!user) {
-      req.flash('error', 'User not found.');
-      return res.redirect('/login');
-    }
-    if (user.role !== 'admin') {
-      req.flash('error', "Access Denied")
-    return res.redirect('/')
-    }
- 
-
-    // Fetch dynamic stats
-    const [productCount, orderCount, revenue, userCount] = await Promise.all([
-      Product.countDocuments({ owner: userId }),
-      Order.countDocuments({ seller: userId }),
+  if (user.role !== 'admin') {
+        req.flash('error', 'Access Denied');
+        return res.redirect('/admin/dashboard');
+      }
+    const [productCount, orderCount, revenueResult, userCount] = await Promise.all([
+      Product.countDocuments({}),
+      Order.countDocuments({}),
       Order.aggregate([
-        { $match: { seller: user._id, status: 'completed' } },
+        { $match: { status: {$in :['completed', 'delivered', 'shipped'] } } },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]),
       User.countDocuments()
     ]);
 
-    const stats = {
-      products: productCount,
-      orders: orderCount,
-      revenue: revenue[0]?.total || 0,
-      users: userCount
-    };
+    const revenue = revenueResult[0]?.total || 0;
 
-    // Fetch recent orders made to this seller
-const orders = await Order.find({ seller: userId })
+    const orders = await Order.find({})
       .sort({ createdAt: -1 })
       .limit(5)
-      .populate('buyer').populate('seller'); // This population is still necessary to get the buyer object
-
-    console.log(orders[0]); // Safely log to check if buyer exists for the first order
+      .populate('buyer');
 
     const formattedOrders = orders.map(order => ({
       _id: order._id,
-      // Use optional chaining (?.) and nullish coalescing (||) for safety
       buyerName: order.buyer?.name || 'Unknown',
       total: order.amount || 0,
-      status: order.status.toUpperCase(),
+      status: order.status,
       createdAt: order.createdAt
     }));
-console.log(formattedOrders[0])
+
     res.render('protected/admin/dashboard', {
-      title: 'Dashboard',
+      title: 'Admin Dashboard',
       user,
-      stats,
-      orders: formattedOrders
+      stats: {
+        products: productCount,
+        orders: orderCount,
+        revenue,
+        users: userCount
+      },
+      orders: formattedOrders,
+      messages: {
+        success: req.flash('success'),
+        error: req.flash('error')
+      }
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     req.flash('error', 'Something went wrong.');
-    res.redirect('/login');
+    res.redirect('/');
   }
 });
+
 
 router.get('/users', authenticateToken, async(req,res)=>{
 try {
@@ -101,6 +98,120 @@ try {
 }
  
 })
+
+
+
+
+// DELETE user by ID
+router.post('/users/:id/delete', authenticateToken,  async (req, res) => {
+  try {
+    const userIdToDelete = req.params.id;
+
+    // Find user
+    const user = await User.findById(userIdToDelete);
+    if (!user) {
+      req.flash('error', 'User not found.');
+      return res.redirect('/admin/users');
+    }
+         const userId = req.user.userId;
+      const admin = await User.findById(userId);
+    if (admin.role !== 'admin') {
+      req.flash('error', "Access Denied")
+      return res.redirect('/')
+      }
+    // Find products owned by user
+    const products = await Product.find({ owner: userIdToDelete });
+
+    // Delete product images from file system
+    for (const product of products) {
+      if (product.images && product.images.length > 0) {
+        product.images.forEach(imageFilename => {
+          const imagePath = path.join(__dirname, '../../uploads', imageFilename);
+          fs.unlink(imagePath, err => {
+            if (err) console.warn(`⚠️ Could not delete image ${imageFilename}:`, err.message);
+          });
+        });
+      }
+    }
+
+    // Delete user's products
+    await Product.deleteMany({ owner: userIdToDelete });
+    await Review.deleteMany({ reviewer: userIdToDelete });
+
+
+    // Optionally delete orders related to user (as seller or buyer)
+    await Order.deleteMany({ $or: [{ seller: userIdToDelete }, { buyer: userIdToDelete }] });
+
+    // Finally delete user
+    await User.findByIdAndDelete(userIdToDelete);
+
+    req.flash('success', 'User and related data deleted successfully.');
+    res.redirect('/admin/users');
+  } catch (error) {
+    console.error('❌ Error deleting user:', error);
+    req.flash('error', 'An error occurred while deleting the user.');
+    res.redirect('/admin/users');
+  }
+});
+
+
+router.get('/orders', authenticateToken,  async (req, res) => {
+  try {
+        const userId = req.user.userId;
+    const user = await User.findById(userId);
+  if (user.role !== 'admin') {
+        req.flash('error', 'Access Denied');
+        return res.redirect('/admin/dashboard');
+      }
+    const orders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .populate('buyer seller product');
+        if (user.role !== 'admin') {
+        req.flash('error', 'Access Denied');
+        return res.redirect('/admin/dashboard');
+      }
+
+    res.render('protected/admin/order', {
+      title: 'All Orders',
+      user: req.user,
+      orders
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Could not fetch orders.');
+    res.redirect('/admin/dashboard');
+  }
+});
+// GET /admin/orders/:orderId
+router.get('/:orderId', authenticateToken,async (req, res) => {
+  try {
+     const userId = req.user.userId;
+    const user = await User.findById(userId);
+  if (user.role !== 'admin') {
+        req.flash('error', 'Access Denied');
+        return res.redirect('/admin/dashboard');
+      }
+    const orderId = req.params.orderId;
+
+    const order = await Order.findById(orderId)
+      .populate('buyer seller product');
+
+    if (!order) {
+      req.flash('error', 'Order not found.');
+      return res.redirect('/admin/orders');
+    }
+
+    res.render('protected/admin/view-order', {
+      title: 'View Order',
+      user: req.user,
+      order
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to load order.');
+    res.redirect('/admin/orders');
+  }
+});
 
 module.exports = router
 
