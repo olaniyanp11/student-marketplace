@@ -12,20 +12,22 @@ const path = require('path');
 
 
 
-
-router.get('/dashboard', authenticateToken,  async (req, res) => {
+router.get('/dashboard', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
     const user = await User.findById(userId);
-  if (user.role !== 'admin') {
-        req.flash('error', 'Access Denied');
-        return res.redirect('/admin/dashboard');
-      }
+
+    if (!user || user.role !== 'admin') {
+      req.flash('error', 'Access Denied');
+      return res.redirect('/login'); // redirect to login if not admin
+    }
+
+    // Counts and revenue (only valid orders/products)
     const [productCount, orderCount, revenueResult, userCount] = await Promise.all([
-      Product.countDocuments({}),
-      Order.countDocuments({}),
+      Product.countDocuments({ isDeleted: false }), // only active products
+      Order.countDocuments({ status: { $in: ['completed', 'delivered', 'shipped'] } }), // only fulfilled orders
       Order.aggregate([
-        { $match: { status: {$in :['completed', 'delivered', 'shipped'] } } },
+        { $match: { status: { $in: ['completed', 'delivered', 'shipped'] } } },
         { $group: { _id: null, total: { $sum: '$amount' } } }
       ]),
       User.countDocuments()
@@ -33,7 +35,8 @@ router.get('/dashboard', authenticateToken,  async (req, res) => {
 
     const revenue = revenueResult[0]?.total || 0;
 
-    const orders = await Order.find({})
+    // Recent 5 valid orders
+    const orders = await Order.find({ status: { $in: ['completed', 'delivered', 'shipped'] } })
       .sort({ createdAt: -1 })
       .limit(5)
       .populate('buyer');
@@ -46,6 +49,27 @@ router.get('/dashboard', authenticateToken,  async (req, res) => {
       createdAt: order.createdAt
     }));
 
+    // Monthly stats for chart
+    const monthlyStats = await Order.aggregate([
+      { $match: { status: { $in: ['completed', 'delivered', 'shipped'] } } },
+      {
+        $group: {
+          _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+          totalRevenue: { $sum: "$amount" },
+          orderCount: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const chartLabels = monthlyStats.map(m => {
+      const date = new Date(m._id.year, m._id.month - 1);
+      return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+    });
+
+    const revenueValues = monthlyStats.map(m => m.totalRevenue);
+    const orderValues = monthlyStats.map(m => m.orderCount);
+
     res.render('protected/admin/dashboard', {
       title: 'Admin Dashboard',
       user,
@@ -56,11 +80,17 @@ router.get('/dashboard', authenticateToken,  async (req, res) => {
         users: userCount
       },
       orders: formattedOrders,
+      chartData: {
+        labels: chartLabels,
+        revenue: revenueValues,
+        orders: orderValues
+      },
       messages: {
         success: req.flash('success'),
         error: req.flash('error')
       }
     });
+    
   } catch (err) {
     console.error(err);
     req.flash('error', 'Something went wrong.');
@@ -155,33 +185,51 @@ router.post('/users/:id/delete', authenticateToken,  async (req, res) => {
 });
 
 
-router.get('/orders', authenticateToken,  async (req, res) => {
+router.get('/orders', authenticateToken, async (req, res) => {
   try {
-        const userId = req.user.userId;
+    const userId = req.user.userId;
     const user = await User.findById(userId);
-  if (user.role !== 'admin') {
-        req.flash('error', 'Access Denied');
-        return res.redirect('/admin/dashboard');
-      }
-    const orders = await Order.find({})
+
+    if (!user || user.role !== 'admin') {
+      req.flash('error', 'Access Denied');
+      return res.redirect('/admin/dashboard');
+    }
+
+    const { status, buyer, seller } = req.query;
+
+    // Build dynamic filter
+    let filter = {};
+
+    if (status) {
+      filter.status = status; // e.g., shipped, delivered, pending
+    }
+
+    if (buyer) {
+      filter.buyer = buyer; // buyer ID
+    }
+
+    if (seller) {
+      filter.seller = seller; // seller ID
+    }
+
+    const orders = await Order.find(filter)
       .sort({ createdAt: -1 })
       .populate('buyer seller product');
-        if (user.role !== 'admin') {
-        req.flash('error', 'Access Denied');
-        return res.redirect('/admin/dashboard');
-      }
 
     res.render('protected/admin/order', {
       title: 'All Orders',
-      user: req.user,
-      orders
+      user,
+      orders,
+      filterParams: { status, buyer, seller }
     });
+    
   } catch (err) {
     console.error(err);
     req.flash('error', 'Could not fetch orders.');
     res.redirect('/admin/dashboard');
   }
 });
+
 // GET /admin/orders/:orderId
 router.get('/:orderId', authenticateToken,async (req, res) => {
   try {

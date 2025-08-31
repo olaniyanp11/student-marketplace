@@ -1,6 +1,44 @@
 <%- include('../partials/header') %>
 
 <h1 class="text-3xl font-bold text-center mt-10">Marketplace</h1>
+<form method="GET" action="/products/all" 
+  class="max-w-5xl mx-auto mb-10 p-6 rounded-2xl bg-[#141414] shadow-lg flex flex-wrap gap-4 items-center justify-center">
+
+  <!-- Search -->
+  <input 
+    type="text" 
+    name="q" 
+    value="<%= typeof q !== 'undefined' ? q : '' %>" 
+    placeholder="🔍 Search products..." 
+    class="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none w-72">
+
+<!-- Category -->
+<select 
+  name="category" 
+  class="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-gray-500 focus:outline-none">
+  <option value="">All Categories</option>
+  <% categories.forEach(cat => { %>
+    <option value="<%= cat %>" <%= category===cat ? 'selected' : '' %>><%= cat %></option>
+  <% }) %>
+</select>
+
+  <!-- Availability -->
+  <select 
+    name="available" 
+    class="px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-gray-500 focus:outline-none">
+    <option value="">All</option>
+    <option value="true" <%= available==='true' ? 'selected' : '' %>>Available</option>
+    <option value="false" <%= available==='false' ? 'selected' : '' %>>Sold Out</option>
+  </select>
+
+  <!-- Button -->
+  <button 
+    type="submit" 
+    class="px-6 py-2 bg-gray-600 text-white font-medium rounded-xl shadow-md hover:bg-gray-700 transition">
+    Apply Filters
+  </button>
+</form>
+
 
 <div class="px-6 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
   <% products.forEach(p => { %>

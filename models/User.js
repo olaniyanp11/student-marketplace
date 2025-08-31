@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Password is required"],
     minlength: 6
+  },
+  address:{
+    type:String,
+    required :[true, "Address is required"]
   }
 }, { timestamps: true });
 

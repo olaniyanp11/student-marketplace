@@ -18,6 +18,11 @@
       <label class="block mb-1">Current Profile Picture</label><br>
       <img src="<%= user.profilePic %>" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover">
     </div>
+    <div>
+      <label class="block mb-1">Current Address</label><br>
+      <p class="text-gray-400"><%= user.address %></p>
+      <input type="text" name="address" value="<%= user.address %>" class="w-full p-2 rounded bg-black border border-gray-700">
+    </div>
 
     <div>
       <label class="block mb-1">Change Profile Picture</label>

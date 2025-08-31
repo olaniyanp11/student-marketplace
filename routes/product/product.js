@@ -55,14 +55,45 @@ router.post('/create', authenticateToken, upload.single('image'), async (req, re
 });
 
 /* ─── LIST ALL PRODUCTS ──────────────────────────────────── */
-router.get('/all',authenticateToken, async (req, res) => {
-     const user = await User.findById(req.user.userId);
-            if (!user) {
-              req.flash('error', 'User not found.');
-              return res.redirect('/login');
-            }
-  const products = await Product.find().populate('owner');
-  res.render('products/all', { title: 'All Products', products,user });
+router.get('/all', authenticateToken, async (req, res) => {
+  const user = await User.findById(req.user.userId);
+  if (!user) {
+    req.flash('error', 'User not found.');
+    return res.redirect('/login');
+  }
+
+  const { q, category, available } = req.query;
+
+  // Build filter dynamically
+  let filter = { isDeleted: false };
+
+  if (q) {
+    filter.title = { $regex: q, $options: 'i' };
+  }
+
+  if (category) {
+    filter.category = category;
+  }
+
+  if (available === 'true') {
+    filter.isSold = false;
+    filter.quantity = { $gt: 0 };
+  } else if (available === 'false') {
+    filter.$or = [{ isSold: true }, { quantity: { $lte: 0 } }];
+  }
+
+  const products = await Product.find(filter).populate('owner');
+
+  // 🔑 Get distinct categories dynamically
+  const categories = await Product.distinct("category", { isDeleted: false });
+
+  res.render('products/all', { 
+    title: 'All Products', 
+    products, 
+    user, 
+    q, category, available, 
+    categories 
+  });
 });
 
 /* ─── LIST MY PRODUCTS ───────────────────────────────────── */

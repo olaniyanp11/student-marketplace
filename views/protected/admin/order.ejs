@@ -2,6 +2,27 @@
 
 <div class="max-w-6xl mx-auto px-4 py-10 text-white">
   <h1 class="text-3xl font-bold mb-6">All Orders</h1>
+<form method="GET" action="/admin/orders" class="mb-6 flex flex-wrap gap-4 items-center">
+  <!-- Status -->
+  <select name="status" class="px-4 py-2 rounded bg-gray-800 text-white">
+    <option value="">All Status</option>
+    <option value="pending" <%= filterParams?.status==='pending' ? 'selected' : '' %>>Pending</option>
+    <option value="shipped" <%= filterParams?.status==='shipped' ? 'selected' : '' %>>Shipped</option>
+    <option value="delivered" <%= filterParams?.status==='delivered' ? 'selected' : '' %>>Delivered</option>
+  </select>
+
+  <!-- Buyer -->
+  <input type="text" name="buyer" placeholder="Buyer ID" 
+    value="<%= filterParams?.buyer || '' %>"
+    class="px-4 py-2 rounded bg-gray-800 text-white" />
+
+  <!-- Seller -->
+  <input type="text" name="seller" placeholder="Seller ID" 
+    value="<%= filterParams?.seller || '' %>"
+    class="px-4 py-2 rounded bg-gray-800 text-white" />
+
+  <button type="submit" class="px-6 py-2 bg-blue-600 rounded text-white">Apply Filters</button>
+</form>
 
   <% if (orders.length > 0) { %>
     <div class="grid md:grid-cols-2 gap-6">

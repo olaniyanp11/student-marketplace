@@ -47,7 +47,7 @@ router.get('/login', redirectIfAuthenticated,(req, res) => {
 
 // POST /register
 router.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password,address } = req.body;
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -61,7 +61,7 @@ router.post('/register', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ name, email, password: hashedPassword });
+        const newUser = new User({ name, email, password: hashedPassword,address });
         await newUser.save();
 
         req.flash('success', 'Account created successfully. Please login.');
@@ -144,13 +144,44 @@ Order.aggregate([
       status: order.status.toUpperCase(),
       createdAt: order.createdAt
     }));
+// Monthly stats for the chart (orders + revenue)
+const monthlyStats = await Order.aggregate([
+  { 
+    $match: { 
+      seller: user._id, 
+      status: { $in: ['completed', 'delivered', 'shipped'] } 
+    } 
+  },
+  {
+    $group: {
+      _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+      totalRevenue: { $sum: "$amount" },
+      orderCount: { $sum: 1 }
+    }
+  },
+  { $sort: { "_id.year": 1, "_id.month": 1 } }
+]);
 
-    res.render('protected/dashboard', {
-      title: 'Dashboard',
-      user,
-      stats,
-      orders: formattedOrders
-    });
+// Format chart data
+const chartLabels = monthlyStats.map(m => {
+  const date = new Date(m._id.year, m._id.month - 1);
+  return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+});
+const revenueValues = monthlyStats.map(m => m.totalRevenue);
+const orderValues = monthlyStats.map(m => m.orderCount);
+
+ res.render('protected/dashboard', {
+  title: 'Dashboard',
+  user,
+  stats,
+  orders: formattedOrders,
+  chartData: {
+    labels: chartLabels,
+    revenue: revenueValues,
+    orders: orderValues
+  }
+});
+
   } catch (error) {
     console.error(error);
     req.flash('error', 'Something went wrong.');
@@ -171,9 +202,9 @@ router.get(['/user/profile/edit', '/admin/profile/edit'], authenticateToken, asy
 // POST: Update Profile
 router.post(['/user/profile/edit', '/admin/profile/edit'], authenticateToken, upload.single('profilePic'), async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email,address } = req.body;
 
-    const updateData = { name, email };
+    const updateData = { name, email,address };
     if (req.file) {
       updateData.profilePic = '/images/user/' + req.file.filename;
     }

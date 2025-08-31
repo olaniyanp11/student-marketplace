@@ -1,26 +1,26 @@
-// middlewares/redirectIfAuthenticated.js
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv')
-dotenv.config()
+const dotenv = require('dotenv');
+dotenv.config();
 
 function redirectIfAuthenticated(req, res, next) {
   const token = req.cookies.token;
-  if (!token) {
-    
-    return next()
-  };                 
-console.log(token)
+
+  if (!token) return next(); // Not authenticated, continue to login/register
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     const dashboard = decoded.role === 'admin'
       ? '/admin/dashboard'
       : '/user';
 
     return res.redirect(dashboard);
+
   } catch (err) {
-    // Invalid / expired token → wipe cookie and continue
+    // Token is invalid or expired
     res.clearCookie('token');
     return next();
   }
-};
-module.exports = redirectIfAuthenticated
+}
+
+module.exports = redirectIfAuthenticated;

@@ -57,6 +57,11 @@
         <h2 class="text-3xl font-bold"><%= stats.users %></h2>
       </div>
     </div>
+<!-- Line Chart -->
+<div class="mt-10 bg-[#141414] border border-[#1e1e1e] rounded-xl p-6 shadow-lg">
+  <h2 class="text-xl font-semibold mb-4">Sales Overview</h2>
+  <canvas id="salesChart" height="100"></canvas>
+</div>
 
     <!-- Recent Orders -->
     <div class="mt-10 bg-[#141414] border border-[#1e1e1e] rounded-xl">
@@ -102,5 +107,58 @@
     </div>
   </section>
 </main>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  $(document).ready(function () {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: <%- JSON.stringify(chartData.labels) %>,
+        datasets: [
+          {
+            label: 'Revenue (₦)',
+            data: <%- JSON.stringify(chartData.revenue) %>,
+            borderColor: '#9ee261',
+            backgroundColor: 'rgba(158, 226, 97, 0.2)',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#9ee261',
+          },
+          {
+            label: 'Orders',
+            data: <%- JSON.stringify(chartData.orders) %>,
+            borderColor: '#61a5e2',
+            backgroundColor: 'rgba(97, 165, 226, 0.2)',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#61a5e2',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: { color: '#ccc' }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#aaa' },
+            grid: { color: '#1e1e1e' }
+          },
+          y: {
+            ticks: { color: '#aaa' },
+            grid: { color: '#1e1e1e' }
+          }
+        }
+      }
+    });
+  });
+</script>
+
 
 <%- include('../../partials/footer') %>

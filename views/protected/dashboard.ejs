@@ -48,7 +48,7 @@
     </h1>
 
     <!-- Stat Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 pb-10">
       <div class="bg-[#141414] border border-[#1e1e1e] rounded-xl p-6 shadow-lg" data-aos="fade-up">
         <div class="flex justify-between items-center">
           <div>
@@ -86,6 +86,11 @@
         </div>
       </div>
     </div>
+    <div class="bg-[#141414] border border-[#141414] rounded-2xl shadow p-6 lg:col-span-2 pt-10">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Revenue Overview</h3>
+      <canvas id="revenueChart" height="120"></canvas>
+    </div>
+
 
     <!-- Recent Orders Table -->
     <div class="mt-10 bg-[#141414] border border-[#1e1e1e] rounded-xl overflow-hidden" data-aos="fade-up">
@@ -135,5 +140,36 @@
     </div>
   </section>
 </main>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],
+      datasets: [{
+        label: 'Revenue (₦)',
+        data: [0, 0, 0, 0, 0, 0, 0, <%= stats.revenue %>],
+        fill: true,
+        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+        borderColor: '#1e1e1e',
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: 'rgba(99, 102, 241, 1)'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true, labels: { color: '#374151' } }
+      },
+      scales: {
+        x: { ticks: { color: '#6B7280' }, grid: { color: '#E5E7EB' } },
+        y: { ticks: { color: '#6B7280' }, grid: { color: '#E5E7EB' } }
+      }
+    }
+  });
+</script>
 
 <%- include('../partials/footer') %>
